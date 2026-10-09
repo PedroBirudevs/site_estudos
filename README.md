@@ -1,4 +1,4 @@
-# Segunda Faculdade
+# BiruStudy
 
 Site de estudos pessoal: uma aba por matéria, onde você sobe o material da aula e a IA gera resumo e perguntas **usando só esse material** (para não ensinar o que o professor ainda não deu).
 
@@ -8,7 +8,7 @@ Site de estudos pessoal: uma aba por matéria, onde você sobe o material da aul
 - **Materiais**: subir PDFs, fotos (PNG/JPG/WEBP) e textos (.txt/.md), até 20 MB cada. Slides do PowerPoint: exporte como PDF.
 - **Resumo**: a IA lê todos os materiais da matéria e escreve um resumo por tópico, indicando de qual arquivo veio cada parte. Fica salvo.
 - **Perguntas**: múltipla escolha (corrigida na hora) e abertas (a IA corrige sua resposta e explica o que faltou). Dá para escolher um assunto para focar.
-- **Senha** para entrar, já que o site fica público na Vercel e cada resumo gasta créditos da API.
+- **Senha** só nas ações que gravam dados ou chamam a IA (criar/apagar, enviar material, resumo, perguntas). Navegar é livre; o site pede a senha num modal na primeira ação e lembra a liberação.
 
 Próximas etapas: simulados a partir de provas antigas, trilha de Python com terminal (Pyodide), modo prova, mapa mental/slides/voz e pontuação.
 
@@ -19,7 +19,7 @@ Próximas etapas: simulados a partir de provas antigas, trilha de Python com ter
 3. Copie `.env.example` para `.env.local` e preencha:
    - `ANTHROPIC_API_KEY`
    - `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` (Supabase > Project Settings > API; use a *service_role*, que fica só no servidor)
-   - `APP_PASSWORD`: a senha do site
+   - `APP_PASSWORD`: a senha pedida antes de gravar dados ou usar a IA
 4. Rodar local:
    ```bash
    npm install

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Subject, Summary } from "@/lib/supabase";
 import { Markdown } from "./Markdown";
+import { apiFetch } from "./PasswordModal";
 
 const CONTROL = "\u0000";
 
@@ -25,7 +26,7 @@ export function SummaryPanel({
     setError("");
     setContent("");
     try {
-      const res = await fetch(`/api/subjects/${subject.id}/summary`, { method: "POST" });
+      const res = await apiFetch(`/api/subjects/${subject.id}/summary`, { method: "POST" });
       if (!res.ok || !res.body) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error ?? "Erro ao gerar o resumo.");
@@ -54,25 +55,35 @@ export function SummaryPanel({
   const outdated = !loading && content && basedOn !== materialCount;
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3">
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center gap-4">
         <button className="btn" onClick={generate} disabled={loading || materialCount === 0}>
           {loading ? "Gerando resumo..." : content ? "Gerar de novo" : "Gerar resumo"}
         </button>
-        {materialCount === 0 && <span className="text-sm text-muted">Envie materiais na aba Materiais primeiro.</span>}
+        {materialCount === 0 && (
+          <span className="text-sm text-texto-suave">Envie materiais na aba Materiais primeiro.</span>
+        )}
         {outdated && (
-          <span className="text-sm text-muted">Os materiais mudaram desde este resumo. Gere de novo para incluí-los.</span>
+          <span className="text-sm text-texto-suave">
+            Os materiais mudaram desde este resumo. Gere de novo para incluí-los.
+          </span>
         )}
       </div>
-      {error && <p className="text-sm text-bad">{error}</p>}
+      {error && <p className="text-sm text-erro">{error}</p>}
       {content ? (
-        <article className="card">
+        <article className="card sm:p-8">
           <Markdown>{content}</Markdown>
         </article>
+      ) : loading ? (
+        <div className="card space-y-3 sm:p-8" aria-busy>
+          <div className="skeleton h-6 w-1/3" />
+          <div className="skeleton h-4 w-full" />
+          <div className="skeleton h-4 w-11/12" />
+          <div className="skeleton h-4 w-4/5" />
+        </div>
       ) : (
-        !loading &&
         materialCount > 0 && (
-          <p className="text-sm text-muted">
+          <p className="card text-sm text-texto-suave">
             A IA lê todos os materiais desta matéria e monta um resumo por tópico, só com o que está neles.
           </p>
         )

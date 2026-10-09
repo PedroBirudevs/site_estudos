@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import type { Material, Subject } from "@/lib/supabase";
+import { Icon } from "./Icon";
+import { apiFetch } from "./PasswordModal";
 
 const MAX_FILE_BYTES = 20 * 1024 * 1024;
 
@@ -27,7 +29,7 @@ function icon(mime: string) {
 export function MaterialsPanel({ subject, materials }: { subject: Subject; materials: Material[] }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
-  const [progress, setProgress] = useState("");
+  const [progress, setProgress] = useState<{ current: number; total: number; name: string } | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
   const [dragging, setDragging] = useState(false);
 
@@ -35,17 +37,22 @@ export function MaterialsPanel({ subject, materials }: { subject: Subject; mater
     const list = Array.from(files);
     const failed: string[] = [];
     for (const [i, file] of list.entries()) {
-      setProgress(`Enviando ${i + 1} de ${list.length}: ${file.name}`);
+      setProgress({ current: i + 1, total: list.length, name: file.name });
       try {
         if (file.size > MAX_FILE_BYTES) throw new Error(`"${file.name}" passa de 20 MB.`);
         const mimeType = mimeFor(file);
 
-        const signRes = await fetch(`/api/subjects/${subject.id}/materials/upload-url`, {
+        const signRes = await apiFetch(`/api/subjects/${subject.id}/materials/upload-url`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ fileName: file.name, mimeType }),
         });
         const sign = await signRes.json();
+        // Senha cancelada: não pergunta de novo para cada arquivo restante.
+        if (signRes.status === 401) {
+          failed.push(sign.error);
+          break;
+        }
         if (!signRes.ok) throw new Error(sign.error);
 
         const put = await fetch(sign.signedUrl, {
@@ -55,7 +62,7 @@ export function MaterialsPanel({ subject, materials }: { subject: Subject; mater
         });
         if (!put.ok) throw new Error(`Falha ao enviar "${file.name}" para o armazenamento.`);
 
-        const regRes = await fetch(`/api/subjects/${subject.id}/materials`, {
+        const regRes = await apiFetch(`/api/subjects/${subject.id}/materials`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ path: sign.path, fileName: file.name, mimeType, size: file.size }),
@@ -65,7 +72,7 @@ export function MaterialsPanel({ subject, materials }: { subject: Subject; mater
         failed.push(err instanceof Error ? err.message : String(err));
       }
     }
-    setProgress("");
+    setProgress(null);
     setErrors(failed);
     if (inputRef.current) inputRef.current.value = "";
     router.refresh();
@@ -73,19 +80,19 @@ export function MaterialsPanel({ subject, materials }: { subject: Subject; mater
 
   async function remove(m: Material) {
     if (!confirm(`Remover "${m.file_name}"?`)) return;
-    await fetch(`/api/materials/${m.id}`, { method: "DELETE" });
+    await apiFetch(`/api/materials/${m.id}`, { method: "DELETE" });
     router.refresh();
   }
 
   async function removeSubject() {
     if (!confirm(`Apagar a matéria "${subject.name}" e todos os materiais dela?`)) return;
-    await fetch(`/api/subjects/${subject.id}`, { method: "DELETE" });
+    await apiFetch(`/api/subjects/${subject.id}`, { method: "DELETE" });
     router.push("/");
     router.refresh();
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <label
         onDragOver={(e) => {
           e.preventDefault();
@@ -97,14 +104,33 @@ export function MaterialsPanel({ subject, materials }: { subject: Subject; mater
           setDragging(false);
           if (e.dataTransfer.files.length) upload(e.dataTransfer.files);
         }}
-        className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-10 text-center transition ${
-          dragging ? "border-accent bg-accent-soft" : "border-line hover:border-accent"
+        className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-12 text-center transition ${
+          dragging ? "border-azul-principal bg-azul-claro" : "border-borda bg-superficie hover:border-azul-principal"
         }`}
       >
-        <span className="font-medium">{progress || "Arraste arquivos aqui ou clique para escolher"}</span>
-        <span className="mt-1 text-xs text-muted">
-          PDF, fotos (PNG, JPG, WEBP) e texto (.txt, .md), até 20 MB cada. Slides do PowerPoint: exporte como PDF.
+        <span className="grid size-12 place-items-center rounded-full bg-azul-claro text-azul-principal">
+          <Icon name="enviar" className="size-6" />
         </span>
+        {progress ? (
+          <span className="mt-4 w-full max-w-sm">
+            <span className="block truncate text-sm font-medium">
+              Enviando {progress.current} de {progress.total}: {progress.name}
+            </span>
+            <span className="mt-3 block h-2 overflow-hidden rounded-full bg-borda">
+              <span
+                className="block h-full rounded-full bg-azul-principal transition-all"
+                style={{ width: `${((progress.current - 1) / progress.total) * 100}%` }}
+              />
+            </span>
+          </span>
+        ) : (
+          <>
+            <span className="mt-4 font-medium">Arraste arquivos aqui ou clique para escolher</span>
+            <span className="mt-1 max-w-md text-sm text-texto-suave">
+              PDF, fotos (PNG, JPG, WEBP) e texto (.txt, .md), até 20 MB cada. Slides do PowerPoint: exporte como PDF.
+            </span>
+          </>
+        )}
         <input
           ref={inputRef}
           type="file"
@@ -117,7 +143,7 @@ export function MaterialsPanel({ subject, materials }: { subject: Subject; mater
       </label>
 
       {errors.length > 0 && (
-        <ul className="space-y-1 text-sm text-bad">
+        <ul className="space-y-1 text-sm text-erro">
           {errors.map((e, i) => (
             <li key={i}>{e}</li>
           ))}
@@ -125,25 +151,25 @@ export function MaterialsPanel({ subject, materials }: { subject: Subject; mater
       )}
 
       {materials.length > 0 ? (
-        <ul className="divide-y divide-line rounded-xl border border-line bg-card">
+        <ul className="card divide-y divide-borda p-0">
           {materials.map((m) => (
-            <li key={m.id} className="flex items-center gap-3 px-4 py-3">
-              <span className="w-10 shrink-0 rounded bg-accent-soft py-1 text-center text-[10px] font-bold text-accent">
+            <li key={m.id} className="flex items-center gap-4 px-5 py-4">
+              <span className="w-11 shrink-0 rounded-md bg-azul-claro py-1.5 text-center text-[10px] font-bold text-azul-principal">
                 {icon(m.mime_type)}
               </span>
-              <span className="min-w-0 flex-1 truncate text-sm">{m.file_name}</span>
-              <span className="shrink-0 text-xs text-muted">{formatSize(m.size_bytes)}</span>
-              <button onClick={() => remove(m)} className="shrink-0 text-xs text-muted hover:text-bad">
+              <span className="min-w-0 flex-1 truncate text-sm font-medium">{m.file_name}</span>
+              <span className="hidden shrink-0 text-xs text-texto-suave sm:inline">{formatSize(m.size_bytes)}</span>
+              <button onClick={() => remove(m)} className="shrink-0 text-sm text-texto-suave hover:text-erro">
                 Remover
               </button>
             </li>
           ))}
         </ul>
       ) : (
-        <p className="text-sm text-muted">Nenhum material ainda.</p>
+        <p className="card text-sm text-texto-suave">Nenhum material ainda. Envie o primeiro arquivo acima.</p>
       )}
 
-      <button onClick={removeSubject} className="text-xs text-muted hover:text-bad">
+      <button onClick={removeSubject} className="text-sm text-texto-suave hover:text-erro">
         Apagar matéria
       </button>
     </div>
