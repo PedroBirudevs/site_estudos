@@ -23,7 +23,7 @@ export function NewSubjectForm() {
     const data = await res.json();
     setLoading(false);
     if (!res.ok) return setError(data.error ?? "Erro ao criar matéria.");
-    router.push(`/materias/${data.id}`);
+    router.push(`/app/materias/${data.id}`);
     router.refresh();
   }
 

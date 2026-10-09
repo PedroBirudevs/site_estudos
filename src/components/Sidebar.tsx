@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { Icon } from "./Icon";
 
 // Usa /public/logo.png; se o arquivo não existir, mostra o capelo.
-export function Logo() {
+export function Logo({ href = "/app" }: { href?: string }) {
   const img = useRef<HTMLImageElement>(null);
   const [failed, setFailed] = useState(false);
 
@@ -16,7 +16,7 @@ export function Logo() {
   }, []);
 
   return (
-    <Link href="/" className="flex items-center gap-2.5 text-lg font-semibold tracking-tight text-texto">
+    <Link href={href} className="flex items-center gap-2.5 text-lg font-semibold tracking-tight text-texto">
       {failed ? (
         <span className="grid size-9 place-items-center rounded-lg bg-azul-claro text-azul-principal">
           <Icon name="capelo" />
@@ -35,7 +35,7 @@ export function Sidebar({ subjects }: { subjects: { id: string; name: string }[]
   const [open, setOpen] = useState(false);
 
   function item(href: string, label: string, icon: "inicio" | "livro") {
-    const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+    const active = href === "/app" ? pathname === "/app" : pathname.startsWith(href);
     return (
       <Link
         key={href}
@@ -85,11 +85,11 @@ export function Sidebar({ subjects }: { subjects: { id: string; name: string }[]
         </div>
 
         <nav className="mt-10 flex-1 space-y-1 overflow-y-auto">
-          {item("/", "Início", "inicio")}
+          {item("/app", "Início", "inicio")}
           {subjects.length > 0 && (
             <p className="px-3 pt-6 pb-2 text-xs font-medium uppercase tracking-wide text-texto-suave">Matérias</p>
           )}
-          {subjects.map((s) => item(`/materias/${s.id}`, s.name, "livro"))}
+          {subjects.map((s) => item(`/app/materias/${s.id}`, s.name, "livro"))}
         </nav>
       </aside>
     </>

@@ -57,6 +57,21 @@ body {
   }
 }
 
+/* Fade ao rolar: só CSS (scroll-driven animations). Navegador sem suporte mostra a seção normalmente. */
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .aparecer {
+      animation: aparecer linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+  }
+}
+
 /* Texto em Markdown gerado pela IA */
 .prose-md { line-height: 1.75; }
 .prose-md h1 { font-size: 1.5rem; margin: 1.75rem 0 0.75rem; }

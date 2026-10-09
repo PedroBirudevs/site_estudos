@@ -87,7 +87,7 @@ export function MaterialsPanel({ subject, materials }: { subject: Subject; mater
   async function removeSubject() {
     if (!confirm(`Apagar a matéria "${subject.name}" e todos os materiais dela?`)) return;
     await apiFetch(`/api/subjects/${subject.id}`, { method: "DELETE" });
-    router.push("/");
+    router.push("/app");
     router.refresh();
   }
 

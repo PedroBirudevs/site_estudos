@@ -26,7 +26,7 @@ export default async function SubjectPage({
   return (
     <div className="space-y-8">
       <div>
-        <Link href="/" className="inline-flex items-center gap-1 text-sm text-texto-suave hover:text-azul-principal">
+        <Link href="/app" className="inline-flex items-center gap-1 text-sm text-texto-suave hover:text-azul-principal">
           <Icon name="voltar" className="size-4" />
           Início
         </Link>

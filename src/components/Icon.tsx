@@ -13,6 +13,13 @@ const PATHS = {
   mais: ["M12 5v14", "M5 12h14"],
   voltar: ["m15 18-6-6 6-6"],
   cadeado: ["M5 11h14v10H5z", "M8 11V7a4 4 0 0 1 8 0v4"],
+  questoes: ["m9 11 3 3L22 4", "M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"],
+  revisao: ["M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8", "M3 3v5h5"],
+  terminal: ["m4 17 6-6-6-6", "M12 19h8"],
+  balanca: ["M12 3v18", "M5 7h14", "M7 21h10", "m5 7-3 7a3 3 0 0 0 6 0z", "m19 7-3 7a3 3 0 0 0 6 0z"],
+  coracao: [
+    "M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z",
+  ],
 } as const;
 
 export function Icon({ name, className = "size-5" }: { name: keyof typeof PATHS; className?: string }) {
