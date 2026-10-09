@@ -14,7 +14,9 @@ export type Subject = {
 
 export type Material = {
   id: string;
-  subject_id: string;
+  // Matéria própria (subject_id) ou matéria do catálogo (materia_id); nunca as duas.
+  subject_id: string | null;
+  materia_id: string | null;
   file_name: string;
   storage_path: string;
   mime_type: string;

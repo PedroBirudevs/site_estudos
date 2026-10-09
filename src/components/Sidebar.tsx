@@ -31,12 +31,16 @@ export function Logo({ href = "/app" }: { href?: string }) {
   );
 }
 
-export function Sidebar({ subjects }: { subjects: { id: string; name: string }[] }) {
+export function Sidebar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  function item(href: string, label: string, icon: "inicio" | "livro") {
-    const active = href === "/app" ? pathname === "/app" : pathname.startsWith(href);
+  function item(href: string, label: string, icon: "inicio" | "capelo" | "pasta") {
+    // "Meu curso" também fica ativo dentro das matérias do catálogo.
+    const active =
+      href === "/app"
+        ? pathname === "/app" || pathname.startsWith("/app/materias/")
+        : pathname.startsWith(href) || (href === "/app/curso" && pathname.startsWith("/app/materia/"));
     return (
       <Link
         key={href}
@@ -87,10 +91,8 @@ export function Sidebar({ subjects }: { subjects: { id: string; name: string }[]
 
         <nav className="mt-10 flex-1 space-y-1 overflow-y-auto">
           {item("/app", "Início", "inicio")}
-          {subjects.length > 0 && (
-            <p className="px-3 pt-6 pb-2 text-xs font-medium uppercase tracking-wide text-texto-suave">Matérias</p>
-          )}
-          {subjects.map((s) => item(`/app/materias/${s.id}`, s.name, "livro"))}
+          {item("/app/curso", "Meu curso", "capelo")}
+          {item("/app/materiais", "Materiais", "pasta")}
         </nav>
 
         <form action={sair} className="border-t border-borda pt-4">

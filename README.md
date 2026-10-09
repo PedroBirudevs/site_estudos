@@ -14,7 +14,7 @@ Próximas etapas: simulados a partir de provas antigas, trilha de Python com ter
 
 ## Como configurar
 
-1. **Supabase** (grátis): crie um projeto em supabase.com. Em *SQL Editor*, cole e rode `supabase/schema.sql` (tabelas e bucket privado `materiais`) e depois `supabase/auth.sql` (tabela `perfis`, dono de cada matéria e RLS). Se já houver matérias cadastradas, crie sua conta no site antes e troque `SEU-EMAIL-AQUI` no `auth.sql` pelo e-mail dela: o que já existe passa a ser seu.
+1. **Supabase** (grátis): crie um projeto em supabase.com. Em *SQL Editor*, cole e rode `supabase/schema.sql` (tabelas e bucket privado `materiais`) e depois `supabase/auth.sql` (tabela `perfis`, dono de cada matéria e RLS). Por fim, rode `supabase/cursos.sql` (cursos, grade de Ciência da Computação, tópicos do 2º período e matrículas). Se já houver matérias cadastradas, crie sua conta no site antes e troque `SEU-EMAIL-AQUI` no `auth.sql` pelo e-mail dela: o que já existe passa a ser seu.
    Em *Authentication > Sign In / Providers > Email*, desligue **Confirm email** por enquanto.
 2. **Chave do Gemini**: crie em aistudio.google.com/apikey.
 3. Copie `.env.example` para `.env.local` e preencha:

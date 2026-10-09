@@ -44,13 +44,16 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
         const content = await gerar(`${systemPrompt(subject)}\n\n${INSTRUCTIONS}`, arquivos);
         send(content);
 
-        const { error } = await db.from("summaries").upsert({
-          subject_id: id,
-          user_id: userId,
-          content,
-          material_count: materials.length,
-          updated_at: new Date().toISOString(),
-        });
+        const { error } = await db.from("summaries").upsert(
+          {
+            subject_id: id,
+            user_id: userId,
+            content,
+            material_count: materials.length,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "subject_id" },
+        );
         if (error) return finish({ error: `Resumo gerado, mas não foi salvo: ${error.message}` });
 
         finish({ ok: true });

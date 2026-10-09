@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
-import type { Material, Subject } from "@/lib/supabase";
+import type { Material } from "@/lib/supabase";
 import { Icon } from "./Icon";
 
 const MAX_FILE_BYTES = 20 * 1024 * 1024;
@@ -25,7 +25,17 @@ function icon(mime: string) {
   return "TXT";
 }
 
-export function MaterialsPanel({ subject, materials }: { subject: Subject; materials: Material[] }) {
+// base: rota da matéria na API (/api/subjects/:id para matéria própria, /api/catalogo/:id para a do catálogo).
+// apagarMateria: só para matéria própria, que a pessoa pode apagar inteira.
+export function MaterialsPanel({
+  base,
+  materials,
+  apagarMateria,
+}: {
+  base: string;
+  materials: Material[];
+  apagarMateria?: { name: string };
+}) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState<{ current: number; total: number; name: string } | null>(null);
@@ -41,7 +51,7 @@ export function MaterialsPanel({ subject, materials }: { subject: Subject; mater
         if (file.size > MAX_FILE_BYTES) throw new Error(`"${file.name}" passa de 20 MB.`);
         const mimeType = mimeFor(file);
 
-        const signRes = await fetch(`/api/subjects/${subject.id}/materials/upload-url`, {
+        const signRes = await fetch(`${base}/materials/upload-url`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ fileName: file.name, mimeType }),
@@ -61,7 +71,7 @@ export function MaterialsPanel({ subject, materials }: { subject: Subject; mater
         });
         if (!put.ok) throw new Error(`Falha ao enviar "${file.name}" para o armazenamento.`);
 
-        const regRes = await fetch(`/api/subjects/${subject.id}/materials`, {
+        const regRes = await fetch(`${base}/materials`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ path: sign.path, fileName: file.name, mimeType, size: file.size }),
@@ -84,8 +94,8 @@ export function MaterialsPanel({ subject, materials }: { subject: Subject; mater
   }
 
   async function removeSubject() {
-    if (!confirm(`Apagar a matéria "${subject.name}" e todos os materiais dela?`)) return;
-    await fetch(`/api/subjects/${subject.id}`, { method: "DELETE" });
+    if (!apagarMateria || !confirm(`Apagar a matéria "${apagarMateria.name}" e todos os materiais dela?`)) return;
+    await fetch(base, { method: "DELETE" });
     router.push("/app");
     router.refresh();
   }
@@ -168,9 +178,11 @@ export function MaterialsPanel({ subject, materials }: { subject: Subject; mater
         <p className="card text-sm text-texto-suave">Nenhum material ainda. Envie o primeiro arquivo acima.</p>
       )}
 
-      <button onClick={removeSubject} className="text-sm text-texto-suave hover:text-erro">
-        Apagar matéria
-      </button>
+      {apagarMateria && (
+        <button onClick={removeSubject} className="text-sm text-texto-suave hover:text-erro">
+          Apagar matéria
+        </button>
+      )}
     </div>
   );
 }

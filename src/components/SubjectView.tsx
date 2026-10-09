@@ -57,7 +57,7 @@ export function SubjectView({
 
       {/* Os painéis ficam montados para não perder o resumo/perguntas ao trocar de aba. */}
       <div hidden={tab !== "materiais"}>
-        <MaterialsPanel subject={subject} materials={materials} />
+        <MaterialsPanel base={`/api/subjects/${subject.id}`} materials={materials} apagarMateria={subject} />
       </div>
       <div hidden={tab !== "resumo"}>
         <SummaryPanel subject={subject} materialCount={materials.length} initial={summary} />
