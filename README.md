@@ -32,7 +32,7 @@ Próximas etapas: simulados a partir de provas antigas, trilha de Python com ter
 
 - Next.js (App Router) + TypeScript + Tailwind.
 - Os arquivos vão direto do navegador para o Supabase Storage por uma URL assinada (não passam pela Vercel, que limita uploads a 4,5 MB).
-- Para gerar resumo/perguntas, o servidor baixa os arquivos da matéria e manda para o Gemini (`gemini-2.5-flash`), que lê PDF e imagem direto. Só `src/lib/ia.ts` sabe qual IA é usada; o prompt (`src/lib/materiais.ts`) proíbe usar conteúdo de fora dos materiais.
+- Para gerar resumo/perguntas, o servidor baixa os arquivos da matéria e manda para o Gemini (`gemini-3.8-flash` por padrão; troque com `GEMINI_MODEL`), que lê PDF e imagem direto. Só `src/lib/ia.ts` sabe qual IA é usada; o prompt (`src/lib/materiais.ts`) proíbe usar conteúdo de fora dos materiais.
 - Perguntas e correções voltam como JSON; o servidor tira o cerco ` ```json ` que a IA às vezes coloca e valida o formato antes de usar.
 - Limite: até ~22 MB de material somado por matéria por pedido. Se passar disso, divida a matéria (ex.: "Redes – Unidade 1").
 

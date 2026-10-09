@@ -2,7 +2,8 @@ import "server-only";
 import { ApiError, GoogleGenAI } from "@google/genai";
 
 // Único arquivo que sabe qual IA o site usa. Para trocar de IA, mexa só aqui.
-const MODEL = "gemini-2.5-flash";
+// Dá para trocar sem mexer no código definindo GEMINI_MODEL no ambiente.
+const MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 
 let client: GoogleGenAI | null = null;
 
