@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isSupportedMime } from "@/lib/claude";
+import { isSupportedMime } from "@/lib/materiais";
 import { BUCKET, db, getSubject } from "@/lib/supabase";
 
 // O arquivo vai direto do navegador para o Supabase por uma URL assinada.

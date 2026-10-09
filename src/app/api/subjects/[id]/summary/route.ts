@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { FALLBACK, MODEL, claude, errorMessage, finalText, materialBlocks, refusalMessage, systemPrompt } from "@/lib/claude";
+import { gerar } from "@/lib/ia";
+import { carregarArquivos, errorMessage, systemPrompt } from "@/lib/materiais";
 import { db, getSubject, listMaterials } from "@/lib/supabase";
 
 export const maxDuration = 300;
@@ -21,9 +22,9 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
   if (!subject) return NextResponse.json({ error: "Matéria não encontrada." }, { status: 404 });
 
   const materials = await listMaterials(id);
-  let blocks;
+  let arquivos;
   try {
-    blocks = await materialBlocks(materials);
+    arquivos = await carregarArquivos(materials);
   } catch (err) {
     return NextResponse.json({ error: errorMessage(err) }, { status: 400 });
   }
@@ -37,30 +38,16 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
         controller.close();
       };
       try {
-        const stream = claude().beta.messages.stream({
-          model: MODEL,
-          max_tokens: 64000,
-          output_config: { effort: "medium" },
-          ...FALLBACK,
-          system: systemPrompt(subject),
-          messages: [{ role: "user", content: [...blocks, { type: "text", text: INSTRUCTIONS }] }],
-        });
-        for await (const event of stream) {
-          if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
-            send(event.delta.text);
-          }
-        }
-        const message = await stream.finalMessage();
-        if (message.stop_reason === "refusal") return finish({ error: refusalMessage() });
+        // A resposta chega inteira de uma vez; o formato do stream continua o mesmo para a tela.
+        const content = await gerar(`${systemPrompt(subject)}\n\n${INSTRUCTIONS}`, arquivos);
+        send(content);
 
-        const content = finalText(message);
         const { error } = await db()
           .from("summaries")
           .upsert({ subject_id: id, content, material_count: materials.length, updated_at: new Date().toISOString() });
         if (error) return finish({ error: `Resumo gerado, mas não foi salvo: ${error.message}` });
 
-        const switched = message.content.some((b) => b.type === "fallback");
-        finish({ ok: true, content: switched ? content : undefined });
+        finish({ ok: true });
       } catch (err) {
         finish({ error: errorMessage(err) });
       }

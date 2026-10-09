@@ -16,5 +16,24 @@ export const GradeSchema = z.object({
   feedback: z.string().describe("Explicação curta para o aluno: o que acertou, o que faltou e o porquê"),
 });
 
+// Instrução para a IA responder só com JSON no formato do schema.
+export function formatoJson(schema: z.ZodType) {
+  return `Responda somente com um JSON válido, sem texto antes ou depois, seguindo este JSON Schema:\n${JSON.stringify(
+    z.toJSONSchema(schema),
+  )}`;
+}
+
+// A IA às vezes cerca o JSON com ```json ... ```; tira isso antes do parse.
+// Devolve null se não for JSON ou não bater com o schema.
+export function lerJson<T>(texto: string, schema: z.ZodType<T>): T | null {
+  const cercado = texto.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  try {
+    const result = schema.safeParse(JSON.parse((cercado ? cercado[1] : texto).trim()));
+    return result.success ? result.data : null;
+  } catch {
+    return null;
+  }
+}
+
 export type Question = z.infer<typeof QuestionSchema>;
 export type Grade = z.infer<typeof GradeSchema>;

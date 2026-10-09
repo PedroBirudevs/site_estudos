@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isSupportedMime } from "@/lib/claude";
+import { isSupportedMime } from "@/lib/materiais";
 import { db } from "@/lib/supabase";
 
 // Registra no banco um arquivo que o navegador já enviou para o Storage.

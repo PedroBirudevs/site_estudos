@@ -15,9 +15,9 @@ Próximas etapas: simulados a partir de provas antigas, trilha de Python com ter
 ## Como configurar
 
 1. **Supabase** (grátis): crie um projeto em supabase.com. Em *SQL Editor*, cole e rode `supabase/schema.sql`. Ele cria as tabelas e o bucket privado `materiais`.
-2. **Chave do Claude**: crie em platform.claude.com (Settings > API Keys) e coloque créditos.
+2. **Chave do Gemini**: crie em aistudio.google.com/apikey.
 3. Copie `.env.example` para `.env.local` e preencha:
-   - `ANTHROPIC_API_KEY`
+   - `GEMINI_API_KEY`
    - `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` (Supabase > Project Settings > API; use a *service_role*, que fica só no servidor)
    - `APP_PASSWORD`: a senha pedida antes de gravar dados ou usar a IA
 4. Rodar local:
@@ -32,11 +32,10 @@ Próximas etapas: simulados a partir de provas antigas, trilha de Python com ter
 
 - Next.js (App Router) + TypeScript + Tailwind.
 - Os arquivos vão direto do navegador para o Supabase Storage por uma URL assinada (não passam pela Vercel, que limita uploads a 4,5 MB).
-- Para gerar resumo/perguntas, o servidor baixa os arquivos da matéria e manda para o Claude (`claude-opus-5-5`), que lê PDF e imagem direto. O prompt de sistema (`src/lib/claude.ts`) proíbe usar conteúdo de fora dos materiais.
-- Os materiais entram com *prompt caching*: depois do primeiro pedido, gerar perguntas ou corrigir respostas na mesma matéria custa bem menos.
-- Se o modelo recusar um pedido, a API refaz automaticamente num modelo reserva (`fallbacks: "default"`).
+- Para gerar resumo/perguntas, o servidor baixa os arquivos da matéria e manda para o Gemini (`gemini-2.5-flash`), que lê PDF e imagem direto. Só `src/lib/ia.ts` sabe qual IA é usada; o prompt (`src/lib/materiais.ts`) proíbe usar conteúdo de fora dos materiais.
+- Perguntas e correções voltam como JSON; o servidor tira o cerco ` ```json ` que a IA às vezes coloca e valida o formato antes de usar.
 - Limite: até ~22 MB de material somado por matéria por pedido. Se passar disso, divida a matéria (ex.: "Redes – Unidade 1").
 
 ## Custo
 
-Cada resumo lê todos os materiais da matéria. Um PDF de 30 páginas dá algo como 40–80 mil tokens de entrada (a US$ 4 por milhão, uns US$ 0,15–0,30 por resumo). Perguntas e correções logo depois saem mais baratas por causa do cache. Acompanhe o gasto em platform.claude.com > Usage.
+Cada resumo, lista de perguntas e correção manda todos os materiais da matéria para a IA. Um PDF de 30 páginas dá algo como 40–80 mil tokens de entrada por pedido. Acompanhe o uso e os limites no Google AI Studio.
