@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import type { Material, Subject } from "@/lib/supabase";
 import { Icon } from "./Icon";
-import { apiFetch } from "./PasswordModal";
 
 const MAX_FILE_BYTES = 20 * 1024 * 1024;
 
@@ -42,13 +41,13 @@ export function MaterialsPanel({ subject, materials }: { subject: Subject; mater
         if (file.size > MAX_FILE_BYTES) throw new Error(`"${file.name}" passa de 20 MB.`);
         const mimeType = mimeFor(file);
 
-        const signRes = await apiFetch(`/api/subjects/${subject.id}/materials/upload-url`, {
+        const signRes = await fetch(`/api/subjects/${subject.id}/materials/upload-url`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ fileName: file.name, mimeType }),
         });
         const sign = await signRes.json();
-        // Senha cancelada: não pergunta de novo para cada arquivo restante.
+        // Sessão expirada: para aqui em vez de falhar arquivo por arquivo.
         if (signRes.status === 401) {
           failed.push(sign.error);
           break;
@@ -62,7 +61,7 @@ export function MaterialsPanel({ subject, materials }: { subject: Subject; mater
         });
         if (!put.ok) throw new Error(`Falha ao enviar "${file.name}" para o armazenamento.`);
 
-        const regRes = await apiFetch(`/api/subjects/${subject.id}/materials`, {
+        const regRes = await fetch(`/api/subjects/${subject.id}/materials`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ path: sign.path, fileName: file.name, mimeType, size: file.size }),
@@ -80,13 +79,13 @@ export function MaterialsPanel({ subject, materials }: { subject: Subject; mater
 
   async function remove(m: Material) {
     if (!confirm(`Remover "${m.file_name}"?`)) return;
-    await apiFetch(`/api/materials/${m.id}`, { method: "DELETE" });
+    await fetch(`/api/materials/${m.id}`, { method: "DELETE" });
     router.refresh();
   }
 
   async function removeSubject() {
     if (!confirm(`Apagar a matéria "${subject.name}" e todos os materiais dela?`)) return;
-    await apiFetch(`/api/subjects/${subject.id}`, { method: "DELETE" });
+    await fetch(`/api/subjects/${subject.id}`, { method: "DELETE" });
     router.push("/app");
     router.refresh();
   }

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { SubjectView } from "@/components/SubjectView";
-import { db, getSubject, listMaterials, type Summary } from "@/lib/supabase";
+import { getSubject, listMaterials, sessao, type Summary } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
@@ -18,9 +18,10 @@ export default async function SubjectPage({
   const subject = await getSubject(id);
   if (!subject) notFound();
 
+  const { db, userId } = await sessao();
   const [materials, summaryRes] = await Promise.all([
     listMaterials(id),
-    db().from("summaries").select("*").eq("subject_id", id).maybeSingle(),
+    db.from("summaries").select("*").eq("subject_id", id).eq("user_id", userId).maybeSingle(),
   ]);
 
   return (

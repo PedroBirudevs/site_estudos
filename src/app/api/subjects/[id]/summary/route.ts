@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { gerar } from "@/lib/ia";
 import { carregarArquivos, errorMessage, systemPrompt } from "@/lib/materiais";
-import { db, getSubject, listMaterials } from "@/lib/supabase";
+import { getSubject, listMaterials, sessao } from "@/lib/supabase";
 
 export const maxDuration = 300;
 
@@ -18,6 +18,8 @@ const CONTROL = "\u0000";
 
 export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  // Pega a sessão antes do stream: depois que a resposta começa, os cookies não estão mais disponíveis.
+  const { db, userId } = await sessao();
   const subject = await getSubject(id);
   if (!subject) return NextResponse.json({ error: "Matéria não encontrada." }, { status: 404 });
 
@@ -42,9 +44,13 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
         const content = await gerar(`${systemPrompt(subject)}\n\n${INSTRUCTIONS}`, arquivos);
         send(content);
 
-        const { error } = await db()
-          .from("summaries")
-          .upsert({ subject_id: id, content, material_count: materials.length, updated_at: new Date().toISOString() });
+        const { error } = await db.from("summaries").upsert({
+          subject_id: id,
+          user_id: userId,
+          content,
+          material_count: materials.length,
+          updated_at: new Date().toISOString(),
+        });
         if (error) return finish({ error: `Resumo gerado, mas não foi salvo: ${error.message}` });
 
         finish({ ok: true });

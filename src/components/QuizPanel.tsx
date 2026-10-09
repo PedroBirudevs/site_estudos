@@ -3,7 +3,6 @@
 import { useState } from "react";
 import type { Grade, Question } from "@/lib/quiz";
 import type { Subject } from "@/lib/supabase";
-import { apiFetch } from "./PasswordModal";
 
 type Result = "certa" | "parcial" | "errada";
 
@@ -26,7 +25,7 @@ export function QuizPanel({ subject, materialCount }: { subject: Subject; materi
     setLoading(true);
     setError("");
     try {
-      const res = await apiFetch(`/api/subjects/${subject.id}/quiz`, {
+      const res = await fetch(`/api/subjects/${subject.id}/quiz`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ count, focus }),
@@ -173,7 +172,7 @@ function OpenQuestion({
     setLoading(true);
     setError("");
     try {
-      const res = await apiFetch(`/api/subjects/${subjectId}/quiz/grade`, {
+      const res = await fetch(`/api/subjects/${subjectId}/quiz/grade`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: q.question, expected: q.expected_answer, answer }),

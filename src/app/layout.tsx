@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { PasswordModal } from "@/components/PasswordModal";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -18,7 +17,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="pt-BR" className={inter.variable}>
       <body className="min-h-screen bg-fundo text-texto antialiased">
         {children}
-        <PasswordModal />
       </body>
     </html>
   );

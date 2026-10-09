@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { sair } from "@/lib/auth";
 import { Icon } from "./Icon";
 
 // Usa /public/logo.png; se o arquivo não existir, mostra o capelo.
@@ -91,6 +92,13 @@ export function Sidebar({ subjects }: { subjects: { id: string; name: string }[]
           )}
           {subjects.map((s) => item(`/app/materias/${s.id}`, s.name, "livro"))}
         </nav>
+
+        <form action={sair} className="border-t border-borda pt-4">
+          <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-texto-suave transition hover:bg-superficie hover:text-texto">
+            <Icon name="sair" className="size-5 shrink-0" />
+            Sair
+          </button>
+        </form>
       </aside>
     </>
   );

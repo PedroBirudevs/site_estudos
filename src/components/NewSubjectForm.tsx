@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { apiFetch } from "./PasswordModal";
 
 export function NewSubjectForm() {
   const router = useRouter();
@@ -15,7 +14,7 @@ export function NewSubjectForm() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const res = await apiFetch("/api/subjects", {
+    const res = await fetch("/api/subjects", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, description }),

@@ -1,5 +1,5 @@
 import "server-only";
-import { BUCKET, db, type Material, type Subject } from "./supabase";
+import { arquivos, type Material, type Subject } from "./supabase";
 
 // Mantém o pedido bem abaixo do limite de dados por pedido da IA (base64 aumenta o tamanho em ~4/3).
 const MAX_TOTAL_BYTES = 22 * 1024 * 1024;
@@ -42,7 +42,7 @@ export async function carregarArquivos(materials: Material[]) {
 
   return Promise.all(
     materials.map(async (m) => {
-      const { data, error } = await db().storage.from(BUCKET).download(m.storage_path);
+      const { data, error } = await arquivos().download(m.storage_path);
       if (error || !data) throw new Error(`Não consegui abrir "${m.file_name}".`);
       return { nome: m.file_name, mime: m.mime_type, dados: Buffer.from(await data.arrayBuffer()) };
     }),

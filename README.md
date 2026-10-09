@@ -8,25 +8,26 @@ Site de estudos pessoal: uma aba por matéria, onde você sobe o material da aul
 - **Materiais**: subir PDFs, fotos (PNG/JPG/WEBP) e textos (.txt/.md), até 20 MB cada. Slides do PowerPoint: exporte como PDF.
 - **Resumo**: a IA lê todos os materiais da matéria e escreve um resumo por tópico, indicando de qual arquivo veio cada parte. Fica salvo.
 - **Perguntas**: múltipla escolha (corrigida na hora) e abertas (a IA corrige sua resposta e explica o que faltou). Dá para escolher um assunto para focar.
-- **Senha** só nas ações que gravam dados ou chamam a IA (criar/apagar, enviar material, resumo, perguntas). Navegar é livre; o site pede a senha num modal na primeira ação e lembra a liberação.
+- **Contas**: cadastro e login com Supabase Auth. A sessão fica num cookie e continua valendo ao fechar o navegador. Sem login, só a página pública, /entrar e /criar-conta abrem. Cada pessoa só vê as próprias matérias, materiais e resumos (coluna `user_id` + RLS).
 
 Próximas etapas: simulados a partir de provas antigas, trilha de Python com terminal (Pyodide), modo prova, mapa mental/slides/voz e pontuação.
 
 ## Como configurar
 
-1. **Supabase** (grátis): crie um projeto em supabase.com. Em *SQL Editor*, cole e rode `supabase/schema.sql`. Ele cria as tabelas e o bucket privado `materiais`.
+1. **Supabase** (grátis): crie um projeto em supabase.com. Em *SQL Editor*, cole e rode `supabase/schema.sql` (tabelas e bucket privado `materiais`) e depois `supabase/auth.sql` (tabela `perfis`, dono de cada matéria e RLS). Se já houver matérias cadastradas, crie sua conta no site antes e troque `SEU-EMAIL-AQUI` no `auth.sql` pelo e-mail dela: o que já existe passa a ser seu.
+   Em *Authentication > Sign In / Providers > Email*, desligue **Confirm email** por enquanto.
 2. **Chave do Gemini**: crie em aistudio.google.com/apikey.
 3. Copie `.env.example` para `.env.local` e preencha:
    - `GEMINI_API_KEY`
-   - `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` (Supabase > Project Settings > API; use a *service_role*, que fica só no servidor)
-   - `APP_PASSWORD`: a senha pedida antes de gravar dados ou usar a IA
+   - `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` (Supabase > Project Settings > API; use a *service_role*, que fica só no servidor e só é usada para os arquivos do Storage)
+   - `SUPABASE_ANON_KEY`: a chave pública (*anon* ou *publishable*), usada só no login
 4. Rodar local:
    ```bash
    npm install
    npm run dev
    ```
    Abra http://localhost:3000.
-5. **Vercel**: importe o repositório e cadastre as mesmas 4 variáveis em *Settings > Environment Variables*.
+5. **Vercel**: importe o repositório e cadastre as mesmas variáveis em *Settings > Environment Variables*.
 
 ## Como funciona por dentro
 

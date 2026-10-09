@@ -1,9 +1,14 @@
 import { Sidebar } from "@/components/Sidebar";
-import { db } from "@/lib/supabase";
+import { sessao } from "@/lib/supabase";
 
 async function sidebarSubjects() {
   try {
-    const { data } = await db().from("subjects").select("id, name").order("created_at", { ascending: true });
+    const { db, userId } = await sessao();
+    const { data } = await db
+      .from("subjects")
+      .select("id, name")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: true });
     return (data ?? []) as { id: string; name: string }[];
   } catch {
     return [];

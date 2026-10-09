@@ -3,7 +3,6 @@
 import { useState } from "react";
 import type { Subject, Summary } from "@/lib/supabase";
 import { Markdown } from "./Markdown";
-import { apiFetch } from "./PasswordModal";
 
 const CONTROL = "\u0000";
 
@@ -26,7 +25,7 @@ export function SummaryPanel({
     setError("");
     setContent("");
     try {
-      const res = await apiFetch(`/api/subjects/${subject.id}/summary`, { method: "POST" });
+      const res = await fetch(`/api/subjects/${subject.id}/summary`, { method: "POST" });
       if (!res.ok || !res.body) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error ?? "Erro ao gerar o resumo.");

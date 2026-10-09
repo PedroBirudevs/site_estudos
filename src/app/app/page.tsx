@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { Icon } from "@/components/Icon";
 import { NewSubjectForm } from "@/components/NewSubjectForm";
-import { db, type Subject } from "@/lib/supabase";
+import { sessao, type Subject } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
-const NOME = "Pedro";
 const FUSO = "America/Sao_Paulo";
 
 function saudacao(agora: Date) {
@@ -14,10 +13,13 @@ function saudacao(agora: Date) {
 }
 
 export default async function Home() {
+  const { db, userId, user } = await sessao();
   const [{ data, error }, summaries] = await Promise.all([
-    db().from("subjects").select("*, materials(count)").order("created_at", { ascending: true }),
-    db().from("summaries").select("*", { count: "exact", head: true }),
+    db.from("subjects").select("*, materials(count)").eq("user_id", userId).order("created_at", { ascending: true }),
+    db.from("summaries").select("*", { count: "exact", head: true }).eq("user_id", userId),
   ]);
+  // Primeiro nome, vindo do cadastro.
+  const nome = String(user.user_metadata?.nome ?? "").split(" ")[0];
 
   if (error) {
     return (
@@ -46,7 +48,8 @@ export default async function Home() {
         <div>
           <p className="text-sm text-texto-suave first-letter:uppercase">{hoje}</p>
           <h1 className="mt-1 text-3xl sm:text-4xl">
-            {saudacao(agora)}, {NOME}
+            {saudacao(agora)}
+            {nome && `, ${nome}`}
           </h1>
         </div>
         {subjects.length > 0 && (

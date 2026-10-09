@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isSupportedMime } from "@/lib/materiais";
-import { BUCKET, db, getSubject } from "@/lib/supabase";
+import { arquivos, getSubject } from "@/lib/supabase";
 
 // O arquivo vai direto do navegador para o Supabase por uma URL assinada.
 // Assim não esbarra no limite de 4,5 MB do corpo das requisições na Vercel.
@@ -18,7 +18,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   const safeName = fileName.normalize("NFD").replace(/[^\w.-]+/g, "_");
   const path = `${id}/${crypto.randomUUID()}-${safeName}`;
-  const { data, error } = await db().storage.from(BUCKET).createSignedUploadUrl(path);
+  const { data, error } = await arquivos().createSignedUploadUrl(path);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ path: data.path, signedUrl: data.signedUrl });
 }
